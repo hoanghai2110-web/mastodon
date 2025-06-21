@@ -10,18 +10,16 @@ services:
         value: production
       - key: DB_HOST
         fromService:
-          type: pserv
           name: mastodon-db
-      - key: REDIS_URL
+          property: host
+      - key: REDIS_HOST
         fromService:
-          type: redis
           name: mastodon-redis
+          property: host
       - key: WEB_DOMAIN
         value: yourdomain.onrender.com
       - key: LOCAL_DOMAIN
         value: yourdomain.onrender.com
-    buildCommand: "bundle install && yarn install && RAILS_ENV=production bundle exec rails assets:precompile"
-    startCommand: "bundle exec rails s -b 0.0.0.0 -p 3000"
 
   - type: worker
     name: mastodon-sidekiq
@@ -34,13 +32,12 @@ services:
         value: production
       - key: DB_HOST
         fromService:
-          type: pserv
           name: mastodon-db
-      - key: REDIS_URL
+          property: host
+      - key: REDIS_HOST
         fromService:
-          type: redis
           name: mastodon-redis
-    startCommand: "bundle exec sidekiq"
+          property: host
 
   - type: web
     name: mastodon-streaming
@@ -51,13 +48,3 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-    startCommand: "node ./streaming/index.js"
-
-  - type: pserv
-    name: mastodon-db
-    env: postgres
-    plan: free
-
-  - type: redis
-    name: mastodon-redis
-    plan: free
