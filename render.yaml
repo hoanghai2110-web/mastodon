@@ -10,10 +10,12 @@ services:
         value: production
       - key: DB_HOST
         fromService:
+          type: postgres
           name: mastodon-db
           property: host
       - key: REDIS_HOST
         fromService:
+          type: redis
           name: mastodon-redis
           property: host
       - key: WEB_DOMAIN
@@ -32,10 +34,12 @@ services:
         value: production
       - key: DB_HOST
         fromService:
+          type: postgres
           name: mastodon-db
           property: host
       - key: REDIS_HOST
         fromService:
+          type: redis
           name: mastodon-redis
           property: host
 
@@ -48,3 +52,14 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+
+  - type: postgres
+    name: mastodon-db
+    plan: free
+
+  - type: redis
+    name: mastodon-redis
+    plan: free
+    ipAllowList: 
+      - source: 0.0.0.0/0
+        description: allow all
