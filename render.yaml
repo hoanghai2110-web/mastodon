@@ -1,0 +1,63 @@
+services:
+  - type: web
+    name: mastodon-web
+    env: docker
+    repo: https://github.com/mastodon/mastodon
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: DB_HOST
+        fromService:
+          type: pserv
+          name: mastodon-db
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: mastodon-redis
+      - key: WEB_DOMAIN
+        value: yourdomain.onrender.com
+      - key: LOCAL_DOMAIN
+        value: yourdomain.onrender.com
+    buildCommand: "bundle install && yarn install && RAILS_ENV=production bundle exec rails assets:precompile"
+    startCommand: "bundle exec rails s -b 0.0.0.0 -p 3000"
+
+  - type: worker
+    name: mastodon-sidekiq
+    env: docker
+    repo: https://github.com/mastodon/mastodon
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: DB_HOST
+        fromService:
+          type: pserv
+          name: mastodon-db
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: mastodon-redis
+    startCommand: "bundle exec sidekiq"
+
+  - type: web
+    name: mastodon-streaming
+    env: docker
+    repo: https://github.com/mastodon/mastodon
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+    startCommand: "node ./streaming/index.js"
+
+  - type: pserv
+    name: mastodon-db
+    env: postgres
+    plan: free
+
+  - type: redis
+    name: mastodon-redis
+    plan: free
